@@ -9,11 +9,7 @@ branches:
 build: off
 
 install:
-<<<<<<< HEAD
   - java -jar artifacts/app-ibank.jar -P:profile=test
-=======
-  - java -jar app-ibank.jar -P:profile=test
->>>>>>> a3aaa5611669ea1984600012279809ab6b78b8f1
   - chmod +x gradlew
 build_script:
     - ./gradlew test --info -Dselenide.headless=true
