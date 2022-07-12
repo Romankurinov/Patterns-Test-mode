@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
+import static ru.netology.UserGenerator.*;
 
 public class UserTest {
 
@@ -15,29 +15,62 @@ public class UserTest {
     }
 
     @Test
-    public void happyPathBlockerUser() {
+    public void shouldSuccessIfRegisteredActiveUser() {
 
-        UserData userBlocker = UserGenerator.generateUser("blocker");
-        UserRegistration.registration(userBlocker);
-
-        $("[data-test-id='login'] input").val(userBlocker.getLogin());
-        $("[data-test-id='password'] input").val(userBlocker.getPassword());
+        var registeredUser = getRegisteredUser("active");
+        $("[data-test-id='login'] input").val(registeredUser.getLogin());
+        $("[data-test-id='password'] input").val(registeredUser.getPassword());
         $x(".//button").click();
-        $x("//h2").should(text("Личный кабинет"));
+        $(".heading").should(text("Личный кабинет"));
     }
 
     @Test
-    public void happyPathActiveUser() {
+    public void shouldGetErrorIfNotRegisteredUser() {
 
-        UserData userActive = UserGenerator.generateUser("active");
-        UserRegistration.registration(userActive);
+        var notRegisteredUser = getUser("active");
 
-        $("[data-test-id='login'] input").val(userActive.getLogin());
-        $("[data-test-id='password'] input").val(userActive.getPassword());
+        $("[data-test-id='login'] input").val(notRegisteredUser.getLogin());
+        $("[data-test-id='password'] input").val(notRegisteredUser.getPassword());
         $x(".//button").click();
-        $x("//h2").should(text("Личный кабинет"));
-        $("[data-test-id='error-notification'] div[class='notification__content']").
-                shouldBe(visible).should(text("Пользователь заблокирован"));
+        $("[data-test-id='error-notification'] [class='notification__content']")
+                .should(text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    public void shouldGetErrorIfBlockedUser() {
+
+        var blockedUser = getRegisteredUser("blocked");
+
+        $("[data-test-id='login'] input").val(blockedUser.getLogin());
+        $("[data-test-id='password'] input").val(blockedUser.getPassword());
         $x(".//button").click();
+        $("[data-test-id='error-notification'] [class='notification__content']")
+                .should(text("Пользователь заблокирован"));
+    }
+
+    @Test
+    public void shouldGetErrorIfWrongLogin() {
+
+        var registeredUser = getRegisteredUser("active");
+        var wrongLogin = getRandomLogin();
+
+        $("[data-test-id='login'] input").val(wrongLogin);
+        $("[data-test-id='password'] input").val(registeredUser.getPassword());
+        $x(".//button").click();
+        $("[data-test-id='error-notification'] [class='notification__content']")
+                .should(text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    public void shouldGetErrorIfWrongPassword() {
+
+        var registeredUser = getRegisteredUser("active");
+        var wrongPassword = getRandomPassword();
+
+        $("[data-test-id='login'] input").val(registeredUser.getLogin());
+        $("[data-test-id='password'] input").val(wrongPassword);
+        $x(".//button").click();
+        $("[data-test-id='error-notification'] [class='notification__content']")
+                .should(text("Неверно указан логин или пароль"));
     }
 }
